@@ -1,0 +1,12 @@
+1. install gcloud
+2. create a project
+3. create a topic for pub/sub
+4. create a subscription for pub/sub
+
+
+Revert
+-------
+gcloud pubsub subscriptions delete TrackingService
+gcloud pubsub topics delete swipe-track-record
+gcloud auth application-default revoke
+gcloud auth revoke
