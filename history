@@ -3,6 +3,11 @@
 3. create a topic for pub/sub
 4. create a subscription for pub/sub
 
+Always
+------
+export GOOGLE_APPLICATION_CREDENTIALS="/Users/mrpin/Downloads/go/TrackingService/trackingservice-383922-fcf9dab78c5f.json"
+
+
 
 Revert
 -------

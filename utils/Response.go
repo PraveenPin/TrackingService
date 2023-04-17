@@ -25,6 +25,7 @@ func (response *Response) Format(w http.ResponseWriter, r *http.Request, err boo
 	m := make(map[int]string)
 
 	m[200] = "OK"
+	m[201] = "New Resource Created"
 	m[400] = "Bad Request."
 	m[404] = "Resource Not Found."
 	m[416] = "Resource Busy Please Try Again."

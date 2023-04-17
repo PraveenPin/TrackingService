@@ -1,4 +1,4 @@
-package glcient
+package gclient
 
 import (
 	"cloud.google.com/go/pubsub"
@@ -25,7 +25,7 @@ func (a *App) GetPubSubClient(ctx context.Context) *pubsub.Client {
 
 	client, err := pubsub.NewClient(ctx, projectID)
 	if err != nil {
-		log.Fatalf("glcient.NewClient:", err)
+		log.Fatalf("gclient.NewClient:", err)
 		return nil
 	}
 	fmt.Println("Pub/Sub client obtained")

@@ -1,9 +1,11 @@
 package controllers
 
 import (
+	"TrackingService/models"
 	"TrackingService/utils"
 	"cloud.google.com/go/pubsub"
 	"context"
+	"encoding/json"
 	"log"
 	"net/http"
 	"sync/atomic"
@@ -11,7 +13,7 @@ import (
 
 const (
 	projectID = "trackingservice-383922"
-	subID     = "TrackingService"
+	subID     = "TrackingSubscription"
 	topic     = "swipe-track-record"
 )
 
@@ -46,6 +48,29 @@ func (tc *TrackingController) SetClient(client *pubsub.Client) {
 }
 
 func (tc *TrackingController) PublishMessage(w http.ResponseWriter, r *http.Request) {
+
+	message := models.SwipeRecordMessage{}
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&message)
+	if err != nil {
+		response.Format(w, r, true, 417, err)
+		return
+	}
+
+	topicClient := tc.client.Topic(topic)
+	result := topicClient.Publish(tc.ctx, &pubsub.Message{
+		Data: []byte(message.ConvertToString()),
+	})
+
+	// Block until the result is returned and a server-generated
+	// ID is returned for the published message.
+	id, err := result.Get(tc.ctx)
+	if err != nil {
+		log.Fatalf("pubsub: result.Get: %v", err)
+		response.Format(w, r, true, 418, err)
+	}
+	log.Println(w, "Published a message; msg ID: \n", id)
+	response.Format(w, r, false, 201, nil)
 
 }
 
