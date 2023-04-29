@@ -1,17 +1,25 @@
 package main
 
 import (
-	"TrackingService/gclient"
-	"TrackingService/routes"
+	"github.com/PraveenPin/TrackingService/clients"
+)
+
+const (
+	projectID = "trackingservice-383922"
+	subID     = "TrackingSubcription"
+	topic     = "swipe-track-record"
 )
 
 func main() {
-	app := &gclient.App{}
+	app := clients.App{}
 	ctx := app.GetAppContext()
 	client := app.GetPubSubClient(ctx)
+	dynamodbSVC := app.GetDynamoDatabaseClient(app.StartAWSSession())
 
-	dispatcher := routes.Dispatcher{}
-	dispatcher.Init(ctx, client)
+	redisClient := app.GetRedisClient()
+	dispatcher := Dispatcher{}
+	dispatcher.Init(ctx, client, redisClient, dynamodbSVC)
 
 	app.CloseClient(client)
+	return
 }

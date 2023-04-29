@@ -1,14 +1,15 @@
 package controllers
 
 import (
-	"TrackingService/models"
-	"TrackingService/utils"
 	"cloud.google.com/go/pubsub"
 	"context"
 	"encoding/json"
+	"github.com/PraveenPin/SwipeMeter/utils"
+	"github.com/PraveenPin/TrackingService/models"
+	"github.com/PraveenPin/TrackingService/services"
+	"github.com/go-redis/redis/v8"
 	"log"
 	"net/http"
-	"sync/atomic"
 )
 
 const (
@@ -24,27 +25,16 @@ type TrackingControllerInterface interface {
 	SetClient(client *pubsub.Client)
 	Ctx()
 	SetCtx(ctx context.Context)
+	RedisClient()
+	SetRedisClient(redisClient *redis.Client)
 }
 
 type TrackingController struct {
-	client *pubsub.Client
-	ctx    context.Context
+	trackingService *services.TrackingService
 }
 
-func (tc *TrackingController) Ctx() context.Context {
-	return tc.ctx
-}
-
-func (tc *TrackingController) SetCtx(ctx context.Context) {
-	tc.ctx = ctx
-}
-
-func (tc *TrackingController) GetClient() *pubsub.Client {
-	return tc.client
-}
-
-func (tc *TrackingController) SetClient(client *pubsub.Client) {
-	tc.client = client
+func NewTrackingController(trackingService *services.TrackingService) *TrackingController {
+	return &TrackingController{trackingService: trackingService}
 }
 
 func (tc *TrackingController) PublishMessage(w http.ResponseWriter, r *http.Request) {
@@ -57,38 +47,13 @@ func (tc *TrackingController) PublishMessage(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	topicClient := tc.client.Topic(topic)
-	result := topicClient.Publish(tc.ctx, &pubsub.Message{
-		Data: []byte(message.ConvertToString()),
-	})
+	_, pub_err := tc.trackingService.PublishMessageService(topic, message)
 
-	// Block until the result is returned and a server-generated
-	// ID is returned for the published message.
-	id, err := result.Get(tc.ctx)
-	if err != nil {
-		log.Fatalf("pubsub: result.Get: %v", err)
-		response.Format(w, r, true, 418, err)
+	if pub_err != nil {
+		log.Fatalf("pubsub: result.Get: %v", pub_err)
+		response.Format(w, r, true, 418, pub_err)
 	}
-	log.Println(w, "Published a message; msg ID: \n", id)
+
 	response.Format(w, r, false, 201, nil)
 
-}
-
-func (tc *TrackingController) GetMessagesFromTopic(w http.ResponseWriter, r *http.Request) {
-	sub := tc.GetClient().Subscription(subID)
-
-	var received int32
-	err := sub.Receive(tc.ctx, func(_ context.Context, msg *pubsub.Message) {
-		log.Println(w, "Got message: %q\n", string(msg.Data))
-		atomic.AddInt32(&received, 1)
-		msg.Ack()
-	})
-	if err != nil {
-		log.Fatalf("sub.Receive:", err)
-		response.Format(w, r, true, 418, err)
-		return
-	}
-	log.Println(w, "Received %d messages\n", received)
-	response.Format(w, r, false, 200, nil)
-	return
 }

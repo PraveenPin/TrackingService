@@ -6,12 +6,12 @@
 Always
 ------
 export GOOGLE_APPLICATION_CREDENTIALS="/Users/mrpin/Downloads/go/TrackingService/trackingservice-383922-fcf9dab78c5f.json"
-
+go run main.go --subscription subscriptionname1
 
 
 Revert
 -------
-gcloud pubsub subscriptions delete TrackingService
+gcloud pubsub subscriptions delete TrackingSubscription
 gcloud pubsub topics delete swipe-track-record
 gcloud auth application-default revoke
 gcloud auth revoke
