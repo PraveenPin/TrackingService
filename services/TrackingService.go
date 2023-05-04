@@ -9,10 +9,6 @@ import (
 	"log"
 )
 
-const (
-	subID = "TrackingSubscription"
-)
-
 type TrackingService struct {
 	client      *pubsub.Client
 	ctx         context.Context
@@ -20,8 +16,8 @@ type TrackingService struct {
 	db          *dynamodb.DynamoDB
 }
 
-func NewTrackingService(client *pubsub.Client, ctx context.Context, redisClient *redis.Client, db *dynamodb.DynamoDB) *TrackingService {
-	return &TrackingService{client: client, ctx: ctx, redisClient: redisClient, db: db}
+func NewTrackingService(client *pubsub.Client, ctx context.Context, db *dynamodb.DynamoDB) *TrackingService {
+	return &TrackingService{client: client, ctx: ctx, db: db}
 }
 
 func (ts *TrackingService) PublishMessageService(topic string, message models.SwipeRecordMessage) (bool, error) {
