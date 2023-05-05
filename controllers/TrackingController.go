@@ -50,7 +50,7 @@ func (tc *TrackingController) PublishMessage(w http.ResponseWriter, r *http.Requ
 	_, pub_err := tc.trackingService.PublishMessageService(topic, message)
 
 	if pub_err != nil {
-		log.Fatalf("pubsub: result.Get: %v", pub_err)
+		log.Println("pubsub: result.Get: %v", pub_err)
 		response.Format(w, r, true, 418, pub_err)
 	}
 
